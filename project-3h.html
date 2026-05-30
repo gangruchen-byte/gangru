@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3H Corporation — gangru.</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter (global UI) + DM Sans (logo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,500&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            logo: ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            ink:     '#1a1917',
+            muted:   '#6b6b67',
+            subtle:  '#a8a8a3',
+            surface: '#f4f3f0',
+            border:  '#e2e0db',
+            accent:  '#c95e2e',
+          },
+          transitionTimingFunction: {
+            'expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* ── Global resets & base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #faf9f7;
+      color: #1a1917;
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+    }
+    @media (hover: none) { body { cursor: auto; } }
+
+    /* ── Custom Cursor ── */
+    #cursor-dot {
+      position: fixed;
+      top: 0; left: 0;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background-color: #c95e2e;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition:
+        width  0.35s cubic-bezier(0.16,1,0.3,1),
+        height 0.35s cubic-bezier(0.16,1,0.3,1),
+        opacity 0.2s ease;
+    }
+    #cursor-dot.is-hovering { width: 32px; height: 32px; opacity: 0.55; }
+    #cursor-dot.is-clicking { width: 8px;  height: 8px;  opacity: 1; }
+    @media (hover: none) { #cursor-dot { display: none; } }
+
+    /* ── Typography helpers ── */
+    .font-logo { font-family: 'DM Sans', sans-serif; font-weight: 500; }
+
+    /* ── Nav link hover underline ── */
+    .nav-link {
+      position: relative;
+      color: #1a1917;
+      text-decoration: none;
+      font-size: 0.875rem;
+      letter-spacing: 0.01em;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: #1a1917;
+      transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.875rem;
+      color: #a8a8a3;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .back-link:hover { color: #1a1917; }
+
+    /* ── CTA email link ── */
+    .cta-email {
+      position: relative;
+      display: inline-block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .cta-email::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 2px;
+      background: #1a1917;
+      transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+    .cta-email:hover::after { width: 100%; }
+
+    /* ── Social links ── */
+    .social-link {
+      text-decoration: none;
+      color: #6b6b67;
+      font-size: 0.8125rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: opacity 0.25s ease, color 0.25s ease;
+    }
+    .social-link:hover { opacity: 0.5; color: #1a1917; }
+
+    /* ── Mobile menu overlay ── */
+    #mobile-menu { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    #mobile-menu.hidden-menu { opacity: 0; visibility: hidden; pointer-events: none; }
+    #mobile-menu.open-menu  { opacity: 1; visibility: visible; pointer-events: auto; }
+
+    /* ── Section fade-in on scroll ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Next-project link hover ── */
+    .next-link {
+      display: inline-block;
+      text-decoration: none;
+      color: #1a1917;
+      transition: opacity 0.25s ease;
+    }
+    .next-link:hover { opacity: 0.55; }
+  </style>
+</head>
+
+<body class="bg-[#faf9f7] text-ink selection:bg-accent/20">
+
+  <!-- ═══════════════════════════════════════════
+       CUSTOM CURSOR (desktop only)
+  ════════════════════════════════════════════ -->
+  <div id="cursor-dot" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════
+       NAVIGATION
+  ════════════════════════════════════════════ -->
+  <header class="w-full px-6 md:px-12 lg:px-20 pt-10 pb-6 flex items-center justify-between">
+    <a href="index.html" class="font-logo text-[1.75rem] leading-none text-ink tracking-tight">
+      gangru<span class="text-accent">.</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-10" aria-label="Primary navigation">
+      <a href="work.html"          class="nav-link">Work</a>
+      <a href="index.html#about"   class="nav-link">About</a>
+      <a href="index.html#contact" class="nav-link">Contact</a>
+    </nav>
+    <button
+      id="menu-toggle"
+      class="md:hidden flex flex-col gap-[5px] p-1 group"
+      aria-label="Open menu"
+      aria-expanded="false"
+    >
+      <span class="block w-6 h-[1.5px] bg-ink transition-transform duration-300 group-[.open]:rotate-45 group-[.open]:translate-y-[6.5px]"></span>
+      <span class="block w-6 h-[1.5px] bg-ink transition-opacity duration-300 group-[.open]:opacity-0"></span>
+      <span class="block w-6 h-[1.5px] bg-ink transition-transform duration-300 group-[.open]:-rotate-45 group-[.open]:-translate-y-[6.5px]"></span>
+    </button>
+  </header>
+
+  <!-- Mobile fullscreen menu -->
+  <div id="mobile-menu" class="hidden-menu fixed inset-0 bg-[#faf9f7] z-50 flex flex-col justify-center items-start px-8">
+    <button id="menu-close" class="absolute top-10 right-6 text-ink text-3xl leading-none" aria-label="Close menu">✕</button>
+    <nav class="flex flex-col gap-8" aria-label="Mobile navigation">
+      <a href="work.html"          class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">Work</a>
+      <a href="index.html#about"   class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">About</a>
+      <a href="index.html#contact" class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">Contact</a>
+    </nav>
+    <p class="absolute bottom-12 text-muted text-sm">gangruchen71@gmail.com</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PROJECT HEADER
+  ════════════════════════════════════════════ -->
+  <section class="px-6 md:px-12 lg:px-20 pt-8 pb-10 reveal">
+
+    <!-- Back link -->
+    <a href="work.html" class="back-link">← Back to work</a>
+
+    <!-- Title -->
+    <h1 class="mt-6 text-[2.5rem] md:text-[3.2rem] font-light tracking-tight text-ink leading-tight">
+      3H Corporation
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="mt-4 text-muted text-[0.9375rem] leading-relaxed max-w-md">
+      A full-stack brand identity for a kitchenware company — from packaging to Amazon storefront.
+    </p>
+
+    <!-- Metadata grid: 2-col on mobile, 4-col on desktop -->
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-6 border-t border-border pt-8">
+      <div>
+        <p class="text-sm text-ink">Role</p>
+        <p class="text-sm text-muted mt-1">Brand Designer</p>
+      </div>
+      <div>
+        <p class="text-sm text-ink">Year</p>
+        <p class="text-sm text-muted mt-1">2024–26</p>
+      </div>
+      <div>
+        <p class="text-sm text-ink">Scope</p>
+        <p class="text-sm text-muted mt-1">Packaging · Listing · A+</p>
+      </div>
+      <div>
+        <p class="text-sm text-ink">Status</p>
+        <p class="text-sm text-muted mt-1">Live on Amazon</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       HERO IMAGE
+  ════════════════════════════════════════════ -->
+  <div class="px-6 md:px-12 lg:px-20 reveal">
+    <div class="aspect-[16/7] bg-gray-200 rounded-xl"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       THE CHALLENGE
+  ════════════════════════════════════════════ -->
+  <div class="px-6 md:px-12 lg:px-20 mt-12 reveal">
+    <p class="text-sm font-semibold text-ink tracking-wide">The challenge</p>
+    <p class="mt-3 text-muted text-[0.9375rem] leading-relaxed md:max-w-sm">
+      How do you build a brand for something as ordinary as a deli container? The strategic
+      anchor: shift the narrative from &ldquo;what&rsquo;s in the box&rdquo; to &ldquo;what
+      happens after the box opens.&rdquo;
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TWO-COLUMN IMAGES
+  ════════════════════════════════════════════ -->
+  <div class="px-6 md:px-12 lg:px-20 mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 reveal">
+    <div class="aspect-[4/3] bg-gray-200 rounded-xl"></div>
+    <div class="aspect-[4/3] bg-gray-200 rounded-xl"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       FULL-WIDTH IMAGE
+  ════════════════════════════════════════════ -->
+  <div class="px-6 md:px-12 lg:px-20 mt-4 reveal">
+    <div class="aspect-[16/7] bg-gray-200 rounded-xl"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       WHAT I LEARNED
+  ════════════════════════════════════════════ -->
+  <div class="px-6 md:px-12 lg:px-20 mt-12 reveal">
+    <p class="text-sm font-semibold text-ink tracking-wide">What I learned</p>
+    <p class="mt-3 text-muted text-[0.9375rem] leading-relaxed md:max-w-sm">
+      Commodity products don&rsquo;t have small design problems &mdash; they have the hardest ones.
+      Good design here doesn&rsquo;t win awards; it wins the click, then the cart, then the
+      repeat purchase.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BOTTOM NAVIGATION
+  ════════════════════════════════════════════ -->
+  <div class="px-6 md:px-12 lg:px-20 mt-20 mb-28 reveal">
+    <div class="border-t border-border pt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+
+      <!-- Next project (left) -->
+      <div>
+        <p class="text-sm text-muted mb-2">Next project</p>
+        <a href="#" class="next-link text-2xl md:text-3xl font-light text-ink leading-snug">
+          The Algorithm of Love →
+        </a>
+      </div>
+
+      <!-- All work (right) -->
+      <a href="work.html" class="nav-link text-sm">All work →</a>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════ -->
+  <footer class="bg-surface border-t border-border px-6 md:px-12 lg:px-20 pt-12 pb-8">
+
+    <div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="text-xs text-subtle uppercase tracking-widest mb-3">Say hello</p>
+        <a
+          href="mailto:gangruchen71@gmail.com"
+          class="cta-email text-3xl md:text-4xl lg:text-5xl font-light tracking-tight text-ink leading-none"
+        >
+          gangruchen71@gmail.com
+        </a>
+      </div>
+      <div class="flex flex-col gap-3 md:items-end">
+        <a href="#" class="social-link">LinkedIn</a>
+        <a href="#" class="social-link">Instagram</a>
+        <a href="#" class="social-link">Read.cv</a>
+      </div>
+    </div>
+
+    <div class="mt-12 mb-6 border-t border-border"></div>
+
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <span class="font-logo text-base text-ink">gangru<span class="text-accent">.</span></span>
+      <p class="text-xs text-subtle">© 2026 Gangru. All rights reserved.</p>
+    </div>
+
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════
+       JAVASCRIPT
+  ════════════════════════════════════════════ -->
+  <script>
+    /* ────────────────────────────────────────────
+       1. CUSTOM CURSOR — bubble-lag lerp animation
+    ──────────────────────────────────────────── */
+    (function() {
+      const isTouch = window.matchMedia('(hover: none)').matches;
+      if (isTouch) return;
+
+      const dot = document.getElementById('cursor-dot');
+      let mouseX = -100, mouseY = -100;
+      let curX = -100, curY = -100;
+      const LERP = 0.14;
+
+      function lerp(a, b, t) { return a + (b - a) * t; }
+
+      function animateCursor() {
+        curX = lerp(curX, mouseX, LERP);
+        curY = lerp(curY, mouseY, LERP);
+        dot.style.left = curX + 'px';
+        dot.style.top  = curY + 'px';
+        requestAnimationFrame(animateCursor);
+      }
+
+      document.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      document.querySelectorAll('a, button, [role="button"]').forEach(function(el) {
+        el.addEventListener('mouseenter', function() { dot.classList.add('is-hovering'); });
+        el.addEventListener('mouseleave', function() { dot.classList.remove('is-hovering'); });
+      });
+
+      document.addEventListener('mousedown', function() {
+        dot.classList.remove('is-hovering');
+        dot.classList.add('is-clicking');
+      });
+      document.addEventListener('mouseup', function() {
+        dot.classList.remove('is-clicking');
+      });
+
+      animateCursor();
+    })();
+
+    /* ────────────────────────────────────────────
+       2. MOBILE MENU TOGGLE
+    ──────────────────────────────────────────── */
+    var menuToggle = document.getElementById('menu-toggle');
+    var menuClose  = document.getElementById('menu-close');
+    var mobileMenu = document.getElementById('mobile-menu');
+
+    function openMobileMenu() {
+      mobileMenu.classList.remove('hidden-menu');
+      mobileMenu.classList.add('open-menu');
+      menuToggle.classList.add('open');
+      menuToggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('open-menu');
+      mobileMenu.classList.add('hidden-menu');
+      menuToggle.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openMobileMenu);
+    menuClose.addEventListener('click', closeMobileMenu);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
+
+    /* ────────────────────────────────────────────
+       3. SCROLL REVEAL — IntersectionObserver
+    ──────────────────────────────────────────── */
+    var revealEls = document.querySelectorAll('.reveal');
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+      revealEls.forEach(function(el) { observer.observe(el); });
+    } else {
+      revealEls.forEach(function(el) { el.classList.add('visible'); });
+    }
+
+    /* ────────────────────────────────────────────
+       4. Re-attach hover listeners for cursor state
+    ──────────────────────────────────────────── */
+    var dot = document.getElementById('cursor-dot');
+    if (dot) {
+      document.addEventListener('mouseover', function(e) {
+        var t = e.target.closest('a, button, [role="button"]');
+        if (t) { dot.classList.add('is-hovering'); }
+        else    { dot.classList.remove('is-hovering'); }
+      });
+    }
+  </script>
+</body>
+</html>

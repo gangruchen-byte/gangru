@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- EDIT: Page title -->
+  <title>gangru. — Brand & Digital Designer</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter (global UI) + DM Sans (logo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,500&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans:  ['Inter', 'system-ui', 'sans-serif'],
+            logo:  ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            /* ── Design Tokens ── */
+            ink:     '#1a1917',   /* near-black text */
+            muted:   '#6b6b67',   /* secondary text */
+            subtle:  '#a8a8a3',   /* tertiary / meta */
+            surface: '#f4f3f0',   /* light warm gray background */
+            border:  '#e2e0db',   /* card borders */
+            accent:  '#c95e2e',   /* the orange dot / period accent */
+          },
+          transitionTimingFunction: {
+            'expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* ── Global resets & base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #faf9f7;
+      color: #1a1917;
+      -webkit-font-smoothing: antialiased;
+      /* Hide default cursor on desktop — restored on touch via JS */
+      cursor: none;
+    }
+
+    /* Show normal cursor on mobile / touch */
+    @media (hover: none) {
+      body { cursor: auto; }
+    }
+
+    /* ── Custom Cursor ── */
+    #cursor-dot {
+      position: fixed;
+      top: 0; left: 0;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background-color: #c95e2e;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition:
+        width  0.35s cubic-bezier(0.16,1,0.3,1),
+        height 0.35s cubic-bezier(0.16,1,0.3,1),
+        opacity 0.2s ease;
+      /* The "bubble" lag is achieved via JS lerp — the CSS transition
+         handles only size / opacity changes */
+    }
+    #cursor-dot.is-hovering {
+      width: 32px;
+      height: 32px;
+      opacity: 0.55;
+    }
+    #cursor-dot.is-clicking {
+      width: 8px;
+      height: 8px;
+      opacity: 1;
+    }
+    /* Hide cursor dot on touch devices */
+    @media (hover: none) {
+      #cursor-dot { display: none; }
+    }
+
+    /* ── Typography helpers ── */
+    .font-logo { font-family: 'DM Sans', sans-serif; font-weight: 500; }
+
+    /* ── Nav link hover underline ── */
+    .nav-link {
+      position: relative;
+      color: #1a1917;
+      text-decoration: none;
+      font-size: 0.875rem;
+      letter-spacing: 0.01em;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: #1a1917;
+      transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    /* ── Work card hover lift ── */
+    .work-card {
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .work-card:hover { transform: translateY(-6px); }
+
+    .work-card .card-img {
+      overflow: hidden;
+    }
+    .work-card .card-img img {
+      transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+    .work-card:hover .card-img img {
+      transform: scale(1.04);
+    }
+
+    /* ── CTA email link ── */
+    .cta-email {
+      position: relative;
+      display: inline-block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .cta-email::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 2px;
+      background: #1a1917;
+      transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+    .cta-email:hover::after { width: 100%; }
+
+    /* ── Social links ── */
+    .social-link {
+      text-decoration: none;
+      color: #6b6b67;
+      font-size: 0.8125rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: opacity 0.25s ease, color 0.25s ease;
+    }
+    .social-link:hover {
+      opacity: 0.5;
+      color: #1a1917;
+    }
+
+    /* ── Mobile menu overlay ── */
+    #mobile-menu {
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    #mobile-menu.hidden-menu {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    #mobile-menu.open-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* ── Section fade-in on scroll ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body class="bg-[#faf9f7] text-ink selection:bg-accent/20">
+
+  <!-- ═══════════════════════════════════════════
+       CUSTOM CURSOR (desktop only)
+  ════════════════════════════════════════════ -->
+  <div id="cursor-dot" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════
+       NAVIGATION
+  ════════════════════════════════════════════ -->
+  <header class="w-full px-6 md:px-12 lg:px-20 pt-10 pb-6 flex items-center justify-between">
+
+    <!-- EDIT: Logo / brand name -->
+    <a href="#" class="font-logo text-[1.75rem] leading-none text-ink tracking-tight">
+      gangru<span class="text-accent">.</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden md:flex items-center gap-10" aria-label="Primary navigation">
+      <!-- EDIT: Nav links -->
+      <a href="work.html" class="nav-link">Work</a>
+      <a href="#about"   class="nav-link">About</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </nav>
+
+    <!-- Mobile hamburger -->
+    <button
+      id="menu-toggle"
+      class="md:hidden flex flex-col gap-[5px] p-1 group"
+      aria-label="Open menu"
+      aria-expanded="false"
+    >
+      <span class="block w-6 h-[1.5px] bg-ink transition-transform duration-300 group-[.open]:rotate-45 group-[.open]:translate-y-[6.5px]"></span>
+      <span class="block w-6 h-[1.5px] bg-ink transition-opacity duration-300 group-[.open]:opacity-0"></span>
+      <span class="block w-6 h-[1.5px] bg-ink transition-transform duration-300 group-[.open]:-rotate-45 group-[.open]:-translate-y-[6.5px]"></span>
+    </button>
+  </header>
+
+  <!-- Mobile fullscreen menu overlay -->
+  <div
+    id="mobile-menu"
+    class="hidden-menu fixed inset-0 bg-[#faf9f7] z-50 flex flex-col justify-center items-start px-8"
+  >
+    <button id="menu-close" class="absolute top-10 right-6 text-ink text-3xl leading-none" aria-label="Close menu">✕</button>
+    <!-- EDIT: Mobile nav links -->
+    <nav class="flex flex-col gap-8" aria-label="Mobile navigation">
+      <a href="work.html" class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">Work</a>
+      <a href="#about"   class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">About</a>
+      <a href="#contact" class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">Contact</a>
+    </nav>
+    <!-- EDIT: Email in mobile menu -->
+    <p class="absolute bottom-12 text-muted text-sm">gangruchen71@gmail.com</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       HERO SECTION
+  ════════════════════════════════════════════ -->
+  <section class="px-6 md:px-12 lg:px-20 pt-12 md:pt-16 pb-20 md:pb-24 reveal">
+    <!-- EDIT: Hero headline -->
+    <h1 class="text-[2.4rem] sm:text-[3rem] md:text-[3.6rem] lg:text-[4.2rem] font-light leading-[1.1] tracking-tight text-ink max-w-2xl">
+      Define the system,<br />
+      Feel the flow<span class="text-accent">.</span>
+    </h1>
+
+    <!-- EDIT: Hero subtext / tagline -->
+    <p class="mt-5 md:mt-6 text-muted text-[0.9375rem] md:text-base max-w-xs md:max-w-sm leading-relaxed">
+      Designer working across brand, editorial &amp; digital products — based in Los Angeles.
+    </p>
+
+    <!-- CTA buttons -->
+    <div class="mt-8 md:mt-10 flex flex-wrap gap-4">
+      <!-- EDIT: CTA button text -->
+      <a
+        href="#work"
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-[#faf9f7] text-sm rounded-full
+               transition-all duration-300 hover:bg-accent hover:scale-[1.03]"
+      >
+        View selected work
+      </a>
+      <a
+        href="#contact"
+        class="inline-flex items-center gap-2 px-5 py-2.5 border border-border text-ink text-sm rounded-full
+               transition-all duration-300 hover:border-ink hover:scale-[1.03]"
+      >
+        Get in touch
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SELECTED WORK SECTION
+  ════════════════════════════════════════════ -->
+  <section id="work" class="px-6 md:px-12 lg:px-20 pb-28">
+
+    <!-- Section header row -->
+    <div class="flex items-center justify-between mb-8 reveal">
+      <!-- EDIT: Section label -->
+      <span class="text-sm text-muted tracking-widest uppercase">Selected work</span>
+      <!-- EDIT: "View all" link -->
+      <a href="work.html" class="nav-link text-sm text-ink flex items-center gap-1">
+        View all <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </a>
+    </div>
+
+    <!-- ── FEATURED CARD (full width on mobile & desktop) ── -->
+    <div class="work-card mb-4 reveal">
+      <a href="project-3h.html" class="block group">
+        <!-- EDIT: Featured project image (unsplash placeholder) -->
+        <div class="card-img rounded-xl overflow-hidden bg-surface aspect-[16/8] md:aspect-[16/7]">
+          <img
+            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1400&q=80&auto=format&fit=crop"
+            alt="3H Corporation — e-commerce branding project"
+            class="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+        <div class="mt-4 flex items-start justify-between">
+          <div>
+            <!-- EDIT: Project title -->
+            <h2 class="text-lg md:text-xl font-medium text-ink leading-snug">3H Corporation</h2>
+            <!-- EDIT: Project tags / meta -->
+            <p class="text-sm text-muted mt-0.5">Live · e-commerce</p>
+          </div>
+          <span class="text-muted text-lg mt-0.5 transition-transform duration-300 group-hover:translate-x-1">→</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── 2-COLUMN CARDS (side by side on tablet+, stacked on mobile) ── -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 reveal">
+
+      <!-- Card 2 -->
+      <div class="work-card">
+        <a href="#" class="block group">
+          <!-- EDIT: Project 2 image -->
+          <div class="card-img rounded-xl overflow-hidden bg-surface aspect-[4/3]">
+            <img
+              src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop"
+              alt="The Algorithm of Love — editorial design project"
+              class="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div class="mt-4 flex items-start justify-between">
+            <div>
+              <!-- EDIT: Project 2 title -->
+              <h2 class="text-lg font-medium text-ink leading-snug">The Algorithm of Love</h2>
+              <!-- EDIT: Project 2 tags -->
+              <p class="text-sm text-muted mt-0.5">Editorial design</p>
+            </div>
+            <span class="text-muted text-lg mt-0.5 transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="work-card">
+        <a href="#" class="block group">
+          <!-- EDIT: Project 3 image -->
+          <div class="card-img rounded-xl overflow-hidden bg-surface aspect-[4/3]">
+            <img
+              src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80&auto=format&fit=crop"
+              alt="826LA — nonprofit brand identity project"
+              class="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div class="mt-4 flex items-start justify-between">
+            <div>
+              <!-- EDIT: Project 3 title -->
+              <h2 class="text-lg font-medium text-ink leading-snug">826LA</h2>
+              <!-- EDIT: Project 3 tags -->
+              <p class="text-sm text-muted mt-0.5">Nonprofit brand</p>
+            </div>
+            <span class="text-muted text-lg mt-0.5 transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </div>
+        </a>
+      </div>
+
+    </div><!-- end 2-col grid -->
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       ABOUT / SERVICES TEASER (Tablet+, bridging section)
+  ════════════════════════════════════════════ -->
+  <section id="about" class="px-6 md:px-12 lg:px-20 pb-24 reveal">
+    <div class="border-t border-border pt-16 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
+
+      <div>
+        <!-- EDIT: About heading -->
+        <h2 class="text-3xl md:text-4xl font-light tracking-tight text-ink leading-tight">
+          Craft that communicates<span class="text-accent">.</span>
+        </h2>
+      </div>
+
+      <div class="flex flex-col gap-5">
+        <!-- EDIT: About body copy -->
+        <p class="text-muted text-[0.9375rem] leading-relaxed">
+          I partner with founders, creative directors, and teams who need a designer
+          that thinks in systems — from the first logo iteration to a fully scaled
+          digital product.
+        </p>
+        <p class="text-muted text-[0.9375rem] leading-relaxed">
+          My work lives at the intersection of clear strategy and considered craft.
+          I believe good design is invisible until it isn't — and when it isn't,
+          it should be memorable.
+        </p>
+        <!-- EDIT: Services list -->
+        <ul class="mt-2 flex flex-wrap gap-2">
+          <li class="px-3 py-1.5 rounded-full border border-border text-sm text-muted">Brand Identity</li>
+          <li class="px-3 py-1.5 rounded-full border border-border text-sm text-muted">Editorial Design</li>
+          <li class="px-3 py-1.5 rounded-full border border-border text-sm text-muted">Digital Product</li>
+          <li class="px-3 py-1.5 rounded-full border border-border text-sm text-muted">Art Direction</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       CONTACT / CTA SECTION
+  ════════════════════════════════════════════ -->
+  <section id="contact" class="px-6 md:px-12 lg:px-20 pb-28 reveal">
+    <div class="border-t border-border pt-16">
+      <!-- EDIT: CTA heading -->
+      <p class="text-sm text-muted tracking-widest uppercase mb-6">Let's build something.</p>
+      <h2 class="text-[2rem] md:text-[2.6rem] lg:text-[3rem] font-light tracking-tight text-ink leading-tight max-w-xl">
+        Currently open to brand &amp; digital product work<span class="text-accent">.</span>
+      </h2>
+      <!-- EDIT: Contact body copy -->
+      <p class="mt-5 text-muted text-[0.9375rem] max-w-sm leading-relaxed">
+        Have a project in mind? Reach out and let's talk through what you're building.
+      </p>
+      <!-- EDIT: Contact email CTA -->
+      <a href="mailto:gangruchen71@gmail.com" class="cta-email mt-8 inline-block text-xl md:text-2xl font-light text-ink">
+        gangruchen71@gmail.com
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER — upgraded, professional
+  ════════════════════════════════════════════ -->
+  <footer class="bg-surface border-t border-border px-6 md:px-12 lg:px-20 pt-12 pb-8">
+
+    <!-- Top row: CTA email (left) + Social links (right) -->
+    <div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+
+      <!-- Left: CTA email block -->
+      <div>
+        <!-- EDIT: Footer CTA label -->
+        <p class="text-xs text-subtle uppercase tracking-widest mb-3">Say hello</p>
+        <!-- EDIT: Footer email link -->
+        <a
+          href="mailto:gangruchen71@gmail.com"
+          class="cta-email text-3xl md:text-4xl lg:text-5xl font-light tracking-tight text-ink leading-none"
+        >
+          gangruchen71@gmail.com
+        </a>
+      </div>
+
+      <!-- Right: Social links -->
+      <div class="flex flex-col gap-3 md:items-end">
+        <!-- EDIT: Social media links — replace # with real URLs -->
+        <a href="#" class="social-link">LinkedIn</a>
+        <a href="#" class="social-link">Instagram</a>
+        <a href="#" class="social-link">Read.cv</a>
+      </div>
+
+    </div>
+
+    <!-- Divider -->
+    <div class="mt-12 mb-6 border-t border-border"></div>
+
+    <!-- Bottom row: Logo + copyright -->
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
+      <!-- EDIT: Footer brand name -->
+      <span class="font-logo text-base text-ink">
+        gangru<span class="text-accent">.</span>
+      </span>
+
+      <!-- EDIT: Copyright year & name -->
+      <p class="text-xs text-subtle">© 2026 Gangru. All rights reserved.</p>
+
+    </div>
+
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════
+       JAVASCRIPT
+  ════════════════════════════════════════════ -->
+  <script>
+    /* ────────────────────────────────────────────
+       1. CUSTOM CURSOR — bubble-lag lerp animation
+       Only active on devices that support hover (desktop)
+    ──────────────────────────────────────────── */
+    (function() {
+      const isTouch = window.matchMedia('(hover: none)').matches;
+      if (isTouch) return; // bail on touch / mobile
+
+      const dot = document.getElementById('cursor-dot');
+      let mouseX = -100, mouseY = -100; // start offscreen
+      let curX = -100, curY = -100;
+      const LERP = 0.14; // lower = more lag / bubble feel
+
+      function lerp(a, b, t) { return a + (b - a) * t; }
+
+      function animateCursor() {
+        curX = lerp(curX, mouseX, LERP);
+        curY = lerp(curY, mouseY, LERP);
+        dot.style.left = curX + 'px';
+        dot.style.top  = curY + 'px';
+        requestAnimationFrame(animateCursor);
+      }
+
+      document.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      /* Hover state: enlarge dot over interactive elements */
+      const interactives = 'a, button, [role="button"]';
+      document.querySelectorAll(interactives).forEach(function(el) {
+        el.addEventListener('mouseenter', function() {
+          dot.classList.add('is-hovering');
+        });
+        el.addEventListener('mouseleave', function() {
+          dot.classList.remove('is-hovering');
+        });
+      });
+
+      /* Click feedback: shrink dot briefly */
+      document.addEventListener('mousedown', function() {
+        dot.classList.remove('is-hovering');
+        dot.classList.add('is-clicking');
+      });
+      document.addEventListener('mouseup', function() {
+        dot.classList.remove('is-clicking');
+      });
+
+      animateCursor();
+    })();
+
+    /* ────────────────────────────────────────────
+       2. MOBILE MENU TOGGLE
+    ──────────────────────────────────────────── */
+    var menuToggle  = document.getElementById('menu-toggle');
+    var menuClose   = document.getElementById('menu-close');
+    var mobileMenu  = document.getElementById('mobile-menu');
+
+    function openMobileMenu() {
+      mobileMenu.classList.remove('hidden-menu');
+      mobileMenu.classList.add('open-menu');
+      menuToggle.classList.add('open');
+      menuToggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('open-menu');
+      mobileMenu.classList.add('hidden-menu');
+      menuToggle.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openMobileMenu);
+    menuClose.addEventListener('click', closeMobileMenu);
+
+    /* Close on ESC */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
+
+    /* ────────────────────────────────────────────
+       3. SCROLL REVEAL — IntersectionObserver
+    ──────────────────────────────────────────── */
+    var revealEls = document.querySelectorAll('.reveal');
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+
+      revealEls.forEach(function(el) { observer.observe(el); });
+    } else {
+      /* Fallback: show all immediately */
+      revealEls.forEach(function(el) { el.classList.add('visible'); });
+    }
+
+    /* ────────────────────────────────────────────
+       4. Re-attach hover listeners to dynamically
+          visible links for cursor state
+    ──────────────────────────────────────────── */
+    var dot = document.getElementById('cursor-dot');
+    if (dot) {
+      document.addEventListener('mouseover', function(e) {
+        var t = e.target.closest('a, button, [role="button"]');
+        if (t) { dot.classList.add('is-hovering'); }
+        else    { dot.classList.remove('is-hovering'); }
+      });
+    }
+  </script>
+</body>
+</html>

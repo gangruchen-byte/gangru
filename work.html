@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Work — gangru.</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter (global UI) + DM Sans (logo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,500&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            logo: ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            ink:     '#1a1917',
+            muted:   '#6b6b67',
+            subtle:  '#a8a8a3',
+            surface: '#f4f3f0',
+            border:  '#e2e0db',
+            accent:  '#c95e2e',
+          },
+          transitionTimingFunction: {
+            'expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* ── Global resets & base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #faf9f7;
+      color: #1a1917;
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+    }
+    @media (hover: none) { body { cursor: auto; } }
+
+    /* ── Custom Cursor ── */
+    #cursor-dot {
+      position: fixed;
+      top: 0; left: 0;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background-color: #c95e2e;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition:
+        width  0.35s cubic-bezier(0.16,1,0.3,1),
+        height 0.35s cubic-bezier(0.16,1,0.3,1),
+        opacity 0.2s ease;
+    }
+    #cursor-dot.is-hovering { width: 32px; height: 32px; opacity: 0.55; }
+    #cursor-dot.is-clicking { width: 8px; height: 8px; opacity: 1; }
+    @media (hover: none) { #cursor-dot { display: none; } }
+
+    /* ── Typography helpers ── */
+    .font-logo { font-family: 'DM Sans', sans-serif; font-weight: 500; }
+
+    /* ── Nav link hover underline ── */
+    .nav-link {
+      position: relative;
+      color: #1a1917;
+      text-decoration: none;
+      font-size: 0.875rem;
+      letter-spacing: 0.01em;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: #1a1917;
+      transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .nav-link:hover::after,
+    .nav-link.active::after { width: 100%; }
+
+    /* ── Work card hover lift ── */
+    .work-card {
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .work-card:hover { transform: translateY(-6px); }
+
+    /* ── CTA email link ── */
+    .cta-email {
+      position: relative;
+      display: inline-block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .cta-email::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 2px;
+      background: #1a1917;
+      transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+    .cta-email:hover::after { width: 100%; }
+
+    /* ── Social links ── */
+    .social-link {
+      text-decoration: none;
+      color: #6b6b67;
+      font-size: 0.8125rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: opacity 0.25s ease, color 0.25s ease;
+    }
+    .social-link:hover { opacity: 0.5; color: #1a1917; }
+
+    /* ── Mobile menu overlay ── */
+    #mobile-menu { transition: opacity 0.3s ease, visibility 0.3s ease; }
+    #mobile-menu.hidden-menu { opacity: 0; visibility: hidden; pointer-events: none; }
+    #mobile-menu.open-menu  { opacity: 1; visibility: visible; pointer-events: auto; }
+
+    /* ── Section fade-in on scroll ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Filter tabs ── */
+    .filter-btn {
+      position: relative;
+      background: none;
+      border: none;
+      padding: 0.25rem 0;
+      font-size: 0.875rem;
+      color: #a8a8a3;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: color 0.2s ease;
+      white-space: nowrap;
+    }
+    .filter-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 1px;
+      background: #1a1917;
+      transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .filter-btn.active { color: #1a1917; font-weight: 500; }
+    .filter-btn.active::after { width: 100%; }
+    .filter-btn:hover { color: #1a1917; }
+    .filter-btn:hover::after { width: 100%; }
+
+    /* ── Card filter transition ── */
+    .card-wrap {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .card-wrap.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+    }
+  </style>
+</head>
+
+<body class="bg-[#faf9f7] text-ink selection:bg-accent/20">
+
+  <!-- ═══════════════════════════════════════════
+       CUSTOM CURSOR (desktop only)
+  ════════════════════════════════════════════ -->
+  <div id="cursor-dot" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════
+       NAVIGATION
+  ════════════════════════════════════════════ -->
+  <header class="w-full px-6 md:px-12 lg:px-20 pt-10 pb-6 flex items-center justify-between">
+    <a href="index.html" class="font-logo text-[1.75rem] leading-none text-ink tracking-tight">
+      gangru<span class="text-accent">.</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-10" aria-label="Primary navigation">
+      <a href="work.html"          class="nav-link active">Work</a>
+      <a href="index.html#about"   class="nav-link">About</a>
+      <a href="index.html#contact" class="nav-link">Contact</a>
+    </nav>
+    <button
+      id="menu-toggle"
+      class="md:hidden flex flex-col gap-[5px] p-1 group"
+      aria-label="Open menu"
+      aria-expanded="false"
+    >
+      <span class="block w-6 h-[1.5px] bg-ink transition-transform duration-300 group-[.open]:rotate-45 group-[.open]:translate-y-[6.5px]"></span>
+      <span class="block w-6 h-[1.5px] bg-ink transition-opacity duration-300 group-[.open]:opacity-0"></span>
+      <span class="block w-6 h-[1.5px] bg-ink transition-transform duration-300 group-[.open]:-rotate-45 group-[.open]:-translate-y-[6.5px]"></span>
+    </button>
+  </header>
+
+  <!-- Mobile fullscreen menu -->
+  <div id="mobile-menu" class="hidden-menu fixed inset-0 bg-[#faf9f7] z-50 flex flex-col justify-center items-start px-8">
+    <button id="menu-close" class="absolute top-10 right-6 text-ink text-3xl leading-none" aria-label="Close menu">✕</button>
+    <nav class="flex flex-col gap-8" aria-label="Mobile navigation">
+      <a href="work.html"          class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">Work</a>
+      <a href="index.html#about"   class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">About</a>
+      <a href="index.html#contact" class="mobile-nav-link font-logo text-5xl text-ink" onclick="closeMobileMenu()">Contact</a>
+    </nav>
+    <p class="absolute bottom-12 text-muted text-sm">gangruchen71@gmail.com</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PAGE HERO
+  ════════════════════════════════════════════ -->
+  <section class="px-6 md:px-12 lg:px-20 pt-12 md:pt-16 pb-10 reveal">
+
+    <h1 class="text-[2.2rem] md:text-[2.8rem] font-light leading-tight tracking-tight text-ink">
+      Selected work<span class="text-accent">.</span>
+    </h1>
+
+    <p class="mt-3 text-muted text-[0.9375rem] max-w-xs leading-relaxed">
+      Brand systems, editorial, and digital products —<br />
+      with a focus on e-commerce.
+    </p>
+
+    <!-- Filter tabs -->
+    <div class="mt-8 flex items-center gap-7 overflow-x-auto pb-1 -mb-1">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="brand">Brand</button>
+      <button class="filter-btn" data-filter="digital">Digital product</button>
+      <button class="filter-btn" data-filter="editorial">Editorial</button>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PROJECT GRID
+  ════════════════════════════════════════════ -->
+  <section class="px-6 md:px-12 lg:px-20 pb-16 reveal">
+    <div id="work-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- 3H Corporation -->
+      <div class="card-wrap" data-category="brand">
+        <div class="work-card">
+          <a href="project-3h.html" class="block group">
+            <div class="aspect-[4/3] bg-[#d5d4d0] rounded-xl"></div>
+            <div class="mt-4">
+              <h2 class="text-[1.125rem] font-medium text-ink leading-snug">3H Corporation</h2>
+              <p class="text-sm text-muted mt-0.5">Brand · e-commerce · live</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- The Algorithm of Love -->
+      <div class="card-wrap" data-category="editorial">
+        <div class="work-card">
+          <a href="#" class="block group">
+            <div class="aspect-[4/3] bg-[#d5d4d0] rounded-xl"></div>
+            <div class="mt-4">
+              <h2 class="text-[1.125rem] font-medium text-ink leading-snug">The Algorithm of Love</h2>
+              <p class="text-sm text-muted mt-0.5">Editorial · conceptual</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- 826LA -->
+      <div class="card-wrap" data-category="brand">
+        <div class="work-card">
+          <a href="#" class="block group">
+            <div class="aspect-[4/3] bg-[#d5d4d0] rounded-xl"></div>
+            <div class="mt-4">
+              <h2 class="text-[1.125rem] font-medium text-ink leading-snug">826LA</h2>
+              <p class="text-sm text-muted mt-0.5">Brand · nonprofit</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- G — Typographic Systems -->
+      <div class="card-wrap" data-category="editorial">
+        <div class="work-card">
+          <a href="#" class="block group">
+            <div class="aspect-[4/3] bg-[#d5d4d0] rounded-xl"></div>
+            <div class="mt-4">
+              <h2 class="text-[1.125rem] font-medium text-ink leading-snug">G — Typographic Systems</h2>
+              <p class="text-sm text-muted mt-0.5">Editorial · typography</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Salju Dessert -->
+      <div class="card-wrap" data-category="brand">
+        <div class="work-card">
+          <a href="#" class="block group">
+            <div class="aspect-[4/3] bg-[#d5d4d0] rounded-xl"></div>
+            <div class="mt-4">
+              <h2 class="text-[1.125rem] font-medium text-ink leading-snug">Salju Dessert</h2>
+              <p class="text-sm text-muted mt-0.5">Brand · menu</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Winsing Construction (in progress) -->
+      <div class="card-wrap" data-category="digital">
+        <div class="work-card">
+          <div class="aspect-[4/3] rounded-xl border border-border flex flex-col items-center justify-center gap-2 text-center px-6">
+            <span class="text-2xl font-light text-subtle leading-none">+</span>
+            <span class="text-[1.125rem] font-medium text-ink mt-1 leading-snug">Winsing Construction</span>
+            <span class="text-sm text-muted">Web design · UX · in progress</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       BEHANCE LINK
+  ════════════════════════════════════════════ -->
+  <div class="px-6 md:px-12 lg:px-20 pb-24 reveal">
+    <a href="#" class="nav-link text-sm font-semibold text-ink">More on Behance →</a>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════ -->
+  <footer class="bg-surface border-t border-border px-6 md:px-12 lg:px-20 pt-12 pb-8">
+
+    <div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="text-xs text-subtle uppercase tracking-widest mb-3">Say hello</p>
+        <a
+          href="mailto:gangruchen71@gmail.com"
+          class="cta-email text-3xl md:text-4xl lg:text-5xl font-light tracking-tight text-ink leading-none"
+        >
+          gangruchen71@gmail.com
+        </a>
+      </div>
+      <div class="flex flex-col gap-3 md:items-end">
+        <a href="#" class="social-link">LinkedIn</a>
+        <a href="#" class="social-link">Instagram</a>
+        <a href="#" class="social-link">Read.cv</a>
+      </div>
+    </div>
+
+    <div class="mt-12 mb-6 border-t border-border"></div>
+
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <span class="font-logo text-base text-ink">gangru<span class="text-accent">.</span></span>
+      <p class="text-xs text-subtle">© 2026 Gangru. All rights reserved.</p>
+    </div>
+
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════
+       JAVASCRIPT
+  ════════════════════════════════════════════ -->
+  <script>
+    /* ────────────────────────────────────────────
+       1. CUSTOM CURSOR — bubble-lag lerp animation
+    ──────────────────────────────────────────── */
+    (function() {
+      const isTouch = window.matchMedia('(hover: none)').matches;
+      if (isTouch) return;
+
+      const dot = document.getElementById('cursor-dot');
+      let mouseX = -100, mouseY = -100;
+      let curX = -100, curY = -100;
+      const LERP = 0.14;
+
+      function lerp(a, b, t) { return a + (b - a) * t; }
+
+      function animateCursor() {
+        curX = lerp(curX, mouseX, LERP);
+        curY = lerp(curY, mouseY, LERP);
+        dot.style.left = curX + 'px';
+        dot.style.top  = curY + 'px';
+        requestAnimationFrame(animateCursor);
+      }
+
+      document.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      document.querySelectorAll('a, button, [role="button"]').forEach(function(el) {
+        el.addEventListener('mouseenter', function() { dot.classList.add('is-hovering'); });
+        el.addEventListener('mouseleave', function() { dot.classList.remove('is-hovering'); });
+      });
+
+      document.addEventListener('mousedown', function() {
+        dot.classList.remove('is-hovering');
+        dot.classList.add('is-clicking');
+      });
+      document.addEventListener('mouseup', function() {
+        dot.classList.remove('is-clicking');
+      });
+
+      animateCursor();
+    })();
+
+    /* ────────────────────────────────────────────
+       2. MOBILE MENU TOGGLE
+    ──────────────────────────────────────────── */
+    var menuToggle = document.getElementById('menu-toggle');
+    var menuClose  = document.getElementById('menu-close');
+    var mobileMenu = document.getElementById('mobile-menu');
+
+    function openMobileMenu() {
+      mobileMenu.classList.remove('hidden-menu');
+      mobileMenu.classList.add('open-menu');
+      menuToggle.classList.add('open');
+      menuToggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('open-menu');
+      mobileMenu.classList.add('hidden-menu');
+      menuToggle.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openMobileMenu);
+    menuClose.addEventListener('click', closeMobileMenu);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
+
+    /* ────────────────────────────────────────────
+       3. SCROLL REVEAL — IntersectionObserver
+    ──────────────────────────────────────────── */
+    var revealEls = document.querySelectorAll('.reveal');
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+      revealEls.forEach(function(el) { observer.observe(el); });
+    } else {
+      revealEls.forEach(function(el) { el.classList.add('visible'); });
+    }
+
+    /* ────────────────────────────────────────────
+       4. Re-attach hover listeners for cursor state
+    ──────────────────────────────────────────── */
+    var dot = document.getElementById('cursor-dot');
+    if (dot) {
+      document.addEventListener('mouseover', function(e) {
+        var t = e.target.closest('a, button, [role="button"]');
+        if (t) { dot.classList.add('is-hovering'); }
+        else    { dot.classList.remove('is-hovering'); }
+      });
+    }
+
+    /* ────────────────────────────────────────────
+       5. FILTER TABS
+    ──────────────────────────────────────────── */
+    var filterBtns = document.querySelectorAll('.filter-btn');
+    var cardWraps  = document.querySelectorAll('.card-wrap');
+
+    filterBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var filter = btn.getAttribute('data-filter');
+
+        filterBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        cardWraps.forEach(function(wrap) {
+          var category = wrap.getAttribute('data-category');
+          if (filter === 'all' || category === filter) {
+            wrap.classList.remove('is-hidden');
+          } else {
+            wrap.classList.add('is-hidden');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

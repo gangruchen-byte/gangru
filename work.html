@@ -165,14 +165,26 @@
     .filter-btn:hover { color: #1a1917; }
     .filter-btn:hover::after { width: 100%; }
 
-    /* ── Card filter transition ── */
-    .card-wrap {
-      transition: opacity 0.3s ease, transform 0.3s ease;
+    /* ── Card filter ── */
+    .card-wrap.is-hidden { display: none; }
+    .card-wrap.is-entering {
+      animation: cardFadeIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
     }
-    .card-wrap.is-hidden {
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(8px);
+    @keyframes cardFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Sticky filter bar ── */
+    #filter-bar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background-color: #faf9f7;
+      transition: box-shadow 0.25s ease;
+    }
+    #filter-bar.is-stuck {
+      box-shadow: 0 2px 16px rgba(26,25,23,0.07);
     }
   </style>
 </head>
@@ -222,7 +234,7 @@
   <!-- ═══════════════════════════════════════════
        PAGE HERO
   ════════════════════════════════════════════ -->
-  <section class="px-6 md:px-12 lg:px-20 pt-12 md:pt-16 pb-10 reveal">
+  <section class="px-6 md:px-12 lg:px-20 pt-12 md:pt-16 pb-8 reveal">
 
     <h1 class="text-[2.2rem] md:text-[2.8rem] font-light leading-tight tracking-tight text-ink">
       Selected work<span class="text-accent">.</span>
@@ -233,15 +245,20 @@
       with a focus on e-commerce.
     </p>
 
-    <!-- Filter tabs -->
-    <div class="mt-8 flex items-center gap-7 overflow-x-auto pb-1 -mb-1">
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       STICKY FILTER BAR — 独立于 reveal section 之外，
+       避免 transform 创建新层叠上下文破坏 sticky
+  ════════════════════════════════════════════ -->
+  <div id="filter-bar" class="px-6 md:px-12 lg:px-20 py-4">
+    <div class="flex items-center gap-7 overflow-x-auto pb-px">
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="brand">Brand</button>
       <button class="filter-btn" data-filter="digital">Digital product</button>
       <button class="filter-btn" data-filter="editorial">Editorial</button>
     </div>
-
-  </section>
+  </div>
 
   <!-- ═══════════════════════════════════════════
        PROJECT GRID
@@ -490,12 +507,31 @@
           var category = wrap.getAttribute('data-category');
           if (filter === 'all' || category === filter) {
             wrap.classList.remove('is-hidden');
+            wrap.classList.remove('is-entering');
+            /* 双 rAF：确保浏览器先渲染 display:block，再触发入场动画 */
+            requestAnimationFrame(function() {
+              requestAnimationFrame(function() {
+                wrap.classList.add('is-entering');
+              });
+            });
           } else {
+            wrap.classList.remove('is-entering');
             wrap.classList.add('is-hidden');
           }
         });
       });
     });
+
+    /* ────────────────────────────────────────────
+       6. STICKY FILTER BAR SHADOW
+       当 filter-bar 吸顶时添加投影，内容从其下方穿过
+    ──────────────────────────────────────────── */
+    var filterBar = document.getElementById('filter-bar');
+    if (filterBar) {
+      window.addEventListener('scroll', function() {
+        filterBar.classList.toggle('is-stuck', filterBar.getBoundingClientRect().top <= 0);
+      }, { passive: true });
+    }
   </script>
 </body>
 </html>
